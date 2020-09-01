@@ -1,0 +1,11 @@
+{
+    
+    "env" : {
+        "MYSQL_USER" : "bagisto",
+        "MYSQL_PASSWORD" : "bagisto",
+        "MYSQL_DATABASE" : "apirest",
+        "MYSQL_HOST" : "localhost",
+        "MYSQL_PORT" : 3306
+
+            }
+}
