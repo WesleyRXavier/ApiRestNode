@@ -49,29 +49,87 @@ router.post('/',(req,res,next)=>{
 // RETORNO UM PRODUTOS ESPECIFICO
 router.get('/:id_produto',(req,res,next)=>{
     const id = req.params.id_produto;
-    var mensagem= 'id diferente de 1';
+    mysql.getConnection((error,conn)=>{
+        if(error){return res.status(500).send({error:error});}
+        conn.query(
+            'SELECT * FROM produtos WHERE id_produto = ?;',
+            [id],
+            (error, resultado, fields)=>{
+                if(error){return res.status(500).send({error:error});}
+                if(resultado.length ==0){
+                    return res.status(404).send({
+                        mensagem:"nao foi encontrado o produto",
+                    })
+                }
+                return res.status(200).send({
+                    response:resultado
+                })
+            }
+        )
+    })
 
-    if(id == 1){
-        mensagem ='id e igual a 1';
-    }
-    res.status(200).send({
-        mensagem:mensagem,
-        id: id,
-    });
+   
 });
 
 //ALTERANDO 
 router.patch('/',(req,res,next)=>{
-    res.status(201).send({
-        mensagem: 'Usando patch aletrando um produto',
+    const id = req.body.id_produto;
+    const nome = req.body.nome;
+    const preco = req.body.preco;
+    mysql.getConnection((error,conn)=>{
+        if(error){return res.status(500).send({error:error});}
+        conn.query(
+            `UPDATE produtos
+             SET nome = ?,
+                preco = ?   
+            WHERE id_produto = ?`,
+            [nome,preco, id],
+            (error, resultado, fields)=>{
+                conn.release();
+                if(error){return res.status(500).send({error:error});}
+                return res.status(202).send({
+                    mensagem:"produto alterado",
+                    
+                });
+            }
+        )
     })
 })
 
 //DELETANDO 
 router.delete('/', (req,res,next)=>{
-    res.status(201).send({
-        mensagem:' Usando odelete na rota Produtos',
-
-    })
+    const id = req.body.id_produto;
+//
+mysql.getConnection((error,conn)=>{
+    if(error){return res.status(500).send({error:error});}
+    conn.query(
+        'SELECT * FROM produtos WHERE id_produto = ?;',
+        [id],
+        (error, resultado, fields)=>{
+            if(error){return res.status(500).send({error:error});}
+            
+            if(resultado.length ==0){
+                return res.status(404).send({
+                    mensagem:"nao foi encontrado o produto",
+                });
+            }
+                conn.query(
+                    'DELETE FROM produtos WHERE id_produto = ?;',
+                    [id],
+                    (error, resultado, fields)=>{
+                        conn.release();
+                        if(error){return res.status(500).send({error:error});}
+                        return res.status(202).send({
+                            mensagem: 'produto deletado '
+                        })
+                    }
+                )
+           
+            
+        }
+    )
+})
+    
+    
 })
 module.exports = router;
