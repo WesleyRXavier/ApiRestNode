@@ -37,48 +37,43 @@ router.post('/cadastro', (req, res, next) => {
                         )
                     });
                 }
-
-
             });
-
-
-
     });
 
 });
 
-router.post('/login',(req,res,next)=>{
-    mysql.getConnection((error, conn)=>{
+router.post('/login', (req, res, next) => {
+    mysql.getConnection((error, conn) => {
         if (error) { return res.status(500).send({ error: error }); }
         const query = 'SELECT * FROM usuarios WHERE  email = ?';
-        conn.query(query, [req.body.email],(error, results , fields)=>{
+        conn.query(query, [req.body.email], (error, results, fields) => {
             conn.release();
             if (error) { return res.status(500).send({ error: error }); }
-            if (results.length < 1){
-                return res.status(401).send({mensagem: 'falha na autenticacao'});
+            if (results.length < 1) {
+                return res.status(401).send({ mensagem: 'falha na autenticacao' });
             }
-            bcrypt.compare(req.body.senha, results[0].senha, (err, result)=>{
-                if(err){
-                    return res.status(401).send({mensagem: 'falha na autenticacao'});
+            bcrypt.compare(req.body.senha, results[0].senha, (err, result) => {
+                if (err) {
+                    return res.status(401).send({ mensagem: 'falha na autenticacao' });
                 }
 
-                if(result){
+                if (result) {
 
-                    const token =  jwt.sign({
+                    const token = jwt.sign({
                         id_usuario: results[0].id_usuario,
-                        email:results[0].email
+                        email: results[0].email
                     }, process.env.JWT_KEY,
-                    {
-                        expiresIn:"1h"
-                    });
+                        {
+                            expiresIn: "1h"
+                        });
                     return res.status(200).send({
-                        mensagem:'autenticado com sucessso',
-                        token:token
-                    
+                        mensagem: 'autenticado com sucessso',
+                        token: token
+
                     });
                 }
                 //se nao der erro e a senha nao for certa
-                return res.status(401).send({mensagem: 'falha na autenticacao senha errada'});
+                return res.status(401).send({ mensagem: 'falha na autenticacao senha errada' });
             });
         })
     })
